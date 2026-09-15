@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OLL CP判断パターン表ライブラリ</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 10px auto; padding: 10px; padding-bottom: 70px; background: #111; color: #fff; box-sizing: border-box; }
+        .card { background: #222; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #444; box-sizing: border-box; }
+        
+        /* input用のスタイルからtextarea用に転用、または共用 */
+        input, textarea { padding: 8px; width: 100%; box-sizing: border-box; margin-bottom: 10px; background: #333; color: #fff; border: 1px solid #555; font-family: sans-serif; }
+        
+        button { background: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 14px; }
+        button:hover { background: #0056b3; }
+        
+        /* 右下に固定するボタンのコンテナ（保存とリストに戻るを並べる用） */
+        .float-btn-container { 
+            position: fixed; 
+            bottom: 20px; 
+            right: 20px; 
+            display: flex; 
+            gap: 10px; 
+            z-index: 999; 
+        }
+        .float-btn { 
+            background: #007bff; 
+            color: #fff; 
+            padding: 10px 15px; 
+            border-radius: 4px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5); 
+            font-size: 14px; 
+            border: none;
+            cursor: pointer;
+        }
+        .float-btn:hover { background: #0056b3; }
+        .float-btn-delete { background: #dc3545;}
+        .float-btn-delete:hover { background: #dc3545;}
+        .float-btn-save { background: #28a745; }
+        .float-btn-save:hover { background: #218838; }
+
+        /* ナビゲーションタブ風ヘッダー（3つ均等配置） */
+        .nav-header { display: flex; gap: 8px; margin-bottom: 15px; }
+        .nav-btn { flex: 1; padding: 10px 5px; background: #222; border: 1px solid #444; color: #aaa; text-align: center; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-sizing: border-box; }
+        .nav-btn.active { background: #007bff; color: #fff; border-color: #007bff; }
+
+        /* グリッドカードリスト（3列固定・はみ出し防止） */
+        .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .oll-grid-card { background: #1a1a1a; border: 2px solid #444; border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; transition: 0.2s; box-sizing: border-box; min-width: 0; overflow: hidden; }
+        .oll-grid-card:hover { border-color: #007bff; background: #222; transform: translateY(-2px); }
+        
+        /* サムネイル図を中央に配置するラッパー */
+        .thumb-wrapper { display: flex; justify-content: center; width: 100%; margin: 6px 0; }
+
+        .grid-card-title { font-size: 13px; font-weight: bold; margin: 6px 0 2px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        /* 一覧のアルゴリズム表示を確実に1行に省略させるスタイル修正 */
+        .grid-card-algo { 
+            font-size: 10px; 
+            color: #888; 
+            font-family: monospace; 
+            display: block;
+            width: 100%;
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            box-sizing: border-box;
+        }
+
+        /* カラーパレット */
+        .color-palette { display: flex; gap: 8px; margin: 10px 0; justify-content: center; }
+        .color-btn { width: 30px; height: 30px; border: 2px solid #555; cursor: pointer; border-radius: 4px; }
+        .color-btn.selected { border: 3px solid #fff; transform: scale(1.1); }
+
+        /* キューブプランビュー全体 */
+        .cube-plan { 
+            display: grid; 
+            grid-template-columns: 32px 48px 48px 48px 32px; 
+            grid-template-rows: 32px 48px 48px 48px 32px; 
+            gap: 8px; 
+            background: #000; 
+            padding: 9px; 
+            width: fit-content; 
+            margin: 10px auto; 
+            border-radius: 4px;
+        }
+        .plan-cell { background: #444; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        
+        /* 中央のU面 */
+        .face-u { border-radius: 1px; }
+
+        /* 外側に向かって広がる正しいパース（全方向統一） */
+        .face-b-left { clip-path: polygon(15% 0, 100% 0, 100% 100%, 0 100%); }
+        .face-b-mid  { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+        .face-b-right{ clip-path: polygon(0 0, 85% 0, 100% 100%, 0 100%); }
+        .face-f-left { clip-path: polygon(0 0, 100% 0, 100% 100%, 15% 100%); }
+        .face-f-mid  { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+        .face-f-right{ clip-path: polygon(0 0, 100% 0, 85% 100%, 0 100%); }
+        .face-l-top    { clip-path: polygon(0 15%, 100% 0, 100% 100%, 0 100%); }
+        .face-l-mid    { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+        .face-l-bottom { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 85%); }
+        .face-r-top    { clip-path: polygon(0 0, 100% 15%, 100% 100%, 0 100%); }
+        .face-r-mid    { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+        .face-r-bottom { clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%); }
+
+        .not-used { visibility: hidden; }
+
+        /* CPテンプレート表 */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: #222; }
+        th, td { border: 1px solid #444; padding: 8px; text-align: center; width: 50%; vertical-align: top; }
+        th { background: #333; font-size: 14px; color: #ddd; }
+        
+        /* セルの表示コンテナ */
+        .table-cell-container { display: flex; flex-direction: column; align-items: center; width: 100%; box-sizing: border-box; }
+        .table-cell-content { cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding: 4px; box-sizing: border-box; }
+        .table-cell-content:hover { background: #2a2a2a; border-radius: 4px; }
+
+        /* ミニプランビュー（リスト・サムネイル用）を少し大きく調整 */
+        .mini-plan { 
+            display: grid; 
+            grid-template-columns: 12px 18px 18px 18px 12px; 
+            grid-template-rows: 12px 18px 18px 18px 12px;    
+            gap: 3px; 
+            background: #000; 
+            padding: 8px; 
+        }
+
+        .mini-cell { background: #444; }
+        
+        /* ミニ版の正しいクリップパス適用 */
+        .mini-b-left { clip-path: polygon(15% 0, 100% 0, 100% 100%, 0 100%); }
+        .mini-b-mid  { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+        .mini-b-right{ clip-path: polygon(0 0, 85% 0, 100% 100%, 0 100%); }
+        .mini-f-left { clip-path: polygon(0 0, 100% 0, 100% 100%, 15% 100%); }
+        .mini-f-mid  { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+        .mini-f-right{ clip-path: polygon(0 0, 100% 0, 85% 100%, 0 100%); }
+        .mini-l-top    { clip-path: polygon(0 15%, 100% 0, 100% 100%, 0 100%); }
+        .mini-l-mid    { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+        .mini-l-bottom { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 85%); }
+        .mini-r-top    { clip-path: polygon(0 0, 100% 15%, 100% 100%, 0 100%); }
+        .mini-r-mid    { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+        .mini-r-bottom { clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%); }
+
+        .algorithm-input { font-family: monospace; white-space: pre-wrap; word-break: break-all; resize: none; overflow-y: hidden; }
+        .detail-textarea { font-family: monospace; white-space: pre-wrap; word-break: break-all; resize: none; overflow-y: hidden; }
+        .new-textarea { font-family: sans-serif; white-space: pre-wrap; word-break: break-all; resize: none; overflow-y: hidden; }
+        
+        /* 備考欄用textareaのスタイル */
+        .memo-textarea {
+            width: 100%;
+            margin-top: 8px;
+            padding: 6px;
+            font-size: 11px;
+            background: #252525;
+            color: #ddd;
+            border: 1px solid #444;
+            border-radius: 4px;
+            resize: none;
+            box-sizing: border-box;
+            font-family: sans-serif;
+            overflow-y: hidden;
+        }
+        .memo-textarea:focus {
+            outline: none;
+            border-color: #007bff;
+            background: #2a2a2a;
+        }
+
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+    </style>
+    <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "yiibcncrpn");
+    </script>
+</head>
+<body>
+
+    <!-- 画面切り替えタブ（リスト・新規登録・バックアップ用） -->
+    <div class="nav-header" id="mainNav">
+        <div class="nav-btn active" id="tabGrid" onclick="switchView('grid')">パターン表リスト</div>
+        <div class="nav-btn" id="tabNew" onclick="switchView('new')">新規登録</div>
+        <div class="nav-btn" id="tabBackup" onclick="switchView('backup')">バックアップ</div>
+    </div>
+
+    <!-- VIEW 1: グリッドリスト画面 -->
+    <div id="viewGrid" class="view-section active">
+        <div class="card">
+            <h2 style="margin-top:0; font-size: 20px;">CP判断 パターン表リスト</h2>
+            <p style="font-size: 12px; color: #aaa;">パターンをタップすると詳細画面に移動します</p>
+            <div id="gridContainer" class="grid-container"></div>
+        </div>
+    </div>
+
+    <!-- VIEW 2: 新規登録画面（inputからtextareaに変更してパスワードマネージャーを回避） -->
+    <div id="viewNew" class="view-section">
+        <div class="card">
+            <h2>新規パターン表登録</h2>
+            <label>OLL番号(タイトル):</label>
+            <textarea id="ollName" class="new-textarea" rows="1" autocomplete="off" data-lpignore="true" placeholder="例: OLL 27(Sune)" oninput="autoResizeTextarea(this)"></textarea>
+            <label>アルゴリズム (手順):</label>
+            <textarea id="ollAlgo" class="algorithm-input new-textarea" rows="1" autocomplete="off" data-lpignore="true" placeholder="例: R U R' U R U2 R'" oninput="autoResizeTextarea(this)"></textarea>
+            <button onclick="createNewOll()">新しいOLLのパターン表を作成</button>
+        </div>
+    </div>
+
+    <!-- VIEW 3-B: バックアップ画面 -->
+    <div id="viewBackup" class="view-section">
+        <div class="card">
+            <h2>データのバックアップ</h2>
+            <p style="font-size: 13px; color: #aaa; line-height: 1.5;">
+                作成したすべてのデータをファイルとして保存（エクスポート）したり、保存したファイルを読み込んで復元（インポート）できます。
+            </p>
+            
+            <hr style="border:0; border-top:1px solid #444; margin: 20px 0;">
+
+            <h3 style="font-size: 15px; color: #fff; margin-bottom: 8px;">1. データの書き出し (エクスポート)</h3>
+            <p style="font-size: 12px; color: #aaa; margin-bottom: 10px;">現在のデータをJSONファイルとして端末にダウンロードします。</p>
+            <button onclick="exportData()" style="background: #28a745;">ファイルに保存する</button>
+
+            <hr style="border:0; border-top:1px solid #444; margin: 20px 0;">
+
+            <h3 style="font-size: 15px; color: #fff; margin-bottom: 8px;">2. データの読み込み (インポート)</h3>
+            <p style="font-size: 12px; color: #aaa; margin-bottom: 10px;">バックアップしたJSONファイルを指定して復元します。<span style="color:#ffc107;">※現在のデータに上書き・統合されます。</span></p>
+            <input type="file" id="importFile" accept=".json" style="background:#222; padding:6px; cursor:pointer;" onchange="importData(event)">
+        </div>
+    </div>
+
+    <!-- VIEW 3: 詳細・表・エディター画面（別画面） -->
+    <div id="viewDetail" class="view-section">
+        <!-- 右下に固定するボタンのコンテナ -->
+        <div class="float-btn-container">
+            <button class="float-btn-delete" onclick="deleteActiveOll()">削除</button>
+            <button class="float-btn float-btn-save" onclick="saveAndReturn()">保存</button>
+            <button class="float-btn" onclick="tryReturnGrid()">リストに戻る</button>
+        </div>
+        
+        <div class="card" style="border: 2px solid #007bff;">
+            <div style="margin-bottom: 8px;">
+                <textarea id="detailName" rows="1" autocomplete="off" data-lpignore="true" style="width: 100%; height: auto; resize: none; overflow-y: hidden; margin-bottom:0; padding: 5px 8px; font-size: 15px; font-weight: bold; box-sizing: border-box; background: #333; color: #fff; border: 1px solid #555;" placeholder="OLL名" oninput="markAsEdited(); autoResizeTextarea(this);"></textarea>
+            </div>
+            <div style="margin-bottom: 10px;">
+                <textarea id="detailAlgo" class="detail-textarea" rows="1" autocomplete="off" data-lpignore="true" style="width: 100%; height: auto; resize: none; overflow-y: hidden; margin-bottom:0; padding: 6px 8px; font-size: 13px; box-sizing: border-box; background: #333; color: #fff; border: 1px solid #555;" placeholder="アルゴリズムを入力" oninput="markAsEdited(); autoResizeTextarea(this);"></textarea>
+            </div>
+
+            <div id="detailTableContainer"></div>
+        </div>
+
+        <!-- パターン編集用エディターカード（詳細画面内） -->
+        <div class="card" id="editorCard" style="border: 2px solid #28a745; display:none;">
+            <h3 id="editingTitle" style="margin-top:0; color:#28a745;">パターン編集中</h3>
+            <p style="font-size: 12px; color: #aaa; margin: 5px 0;">色を選んでキューブのマスをタップしてください</p>
+            
+            <div class="color-palette">
+                <div class="color-btn selected" style="background: yellow;" onclick="selectColor('yellow', this)"></div>
+                <div class="color-btn" style="background: green;" onclick="selectColor('green', this)"></div>
+                <div class="color-btn" style="background: red;" onclick="selectColor('red', this)"></div>
+                <div class="color-btn" style="background: orange;" onclick="selectColor('orange', this)"></div>
+                <div class="color-btn" style="background: blue;" onclick="selectColor('blue', this)"></div>
+                <div class="color-btn" style="background: white;" onclick="selectColor('white', this)"></div>
+                <div class="color-btn" style="background: #444;" onclick="selectColor('#444', this)" title="未配色・グレー"></div>
+            </div>
+
+            <div class="cube-plan" id="editorPlan"></div>
+            <button onclick="closeEditor()" style="background: #28a745; width:100%; margin-top:10px;">色編集を完了する</button>
+        </div>
+    </div>
+
+    <script>
+        let ollList = JSON.parse(localStorage.getItem('oll_cp_plan_v13_list')) || [];
+        let currentColor = 'yellow';
+        let selectedOllId = null;
+        let activeEditorOllId = null;
+        let activeCpKey = null;
+        let isEdited = false;
+        let workingOllData = null;
+
+        function autoResizeTextarea(textarea) {
+            if (!textarea) return;
+            textarea.style.height = 'auto';
+            let newHeight = textarea.scrollHeight;
+            if (newHeight < 32) newHeight = 32;
+            textarea.style.height = newHeight + 'px';
+        }
+
+        function switchView(viewName) {
+            document.getElementById('viewGrid').classList.remove('active');
+            document.getElementById('viewNew').classList.remove('active');
+            document.getElementById('viewBackup').classList.remove('active');
+            document.getElementById('viewDetail').classList.remove('active');
+            document.getElementById('tabGrid').classList.remove('active');
+            document.getElementById('tabNew').classList.remove('active');
+            document.getElementById('tabBackup').classList.remove('active');
+            document.getElementById('mainNav').style.display = 'flex';
+
+            if (viewName === 'grid') {
+                document.getElementById('viewGrid').classList.add('active');
+                document.getElementById('tabGrid').classList.add('active');
+                closeEditor(); // 念のためグリッドに戻る時もエディターを閉じる
+                renderGrid();
+            } else if (viewName === 'new') {
+                document.getElementById('viewNew').classList.add('active');
+                document.getElementById('tabNew').classList.add('active');
+                closeEditor();
+                setTimeout(() => {
+                    document.querySelectorAll('#viewNew textarea').forEach(ta => autoResizeTextarea(ta));
+                }, 50);
+            } else if (viewName === 'backup') {
+                document.getElementById('viewBackup').classList.add('active');
+                document.getElementById('tabBackup').classList.add('active');
+                closeEditor();
+            } else if (viewName === 'detail') {
+                document.getElementById('viewDetail').classList.add('active');
+                document.getElementById('mainNav').style.display = 'none';
+                closeEditor(); // 別の表を開く時に直前のエディターが開かないように必ず閉じる
+                renderDetailView();
+                setTimeout(() => {
+                    const nameTa = document.getElementById('detailName');
+                    const algoTa = document.getElementById('detailAlgo');
+                    if (nameTa) autoResizeTextarea(nameTa);
+                    if (algoTa) autoResizeTextarea(algoTa);
+                    document.querySelectorAll('.memo-textarea').forEach(ta => autoResizeTextarea(ta));
+                }, 50);
+            }
+
+            window.scrollTo(0, 0);
+        }
+
+        function getPlanPos(r, c) {
+            if ((r === 0 && c === 0) || (r === 4 && c === 0) || (r === 0 && c === 4) || (r === 4 && c === 4)) return null;
+            if (r === 0) {
+                let type = c === 1 ? 'b-left' : (c === 3 ? 'b-right' : 'b-mid');
+                return { face: 'B', index: c - 1, type: type };
+            }
+            if (r === 4) {
+                let type = c === 1 ? 'f-left' : (c === 3 ? 'f-right' : 'f-mid');
+                return { face: 'F', index: c - 1, type: type };
+            }
+            if (c === 0) {
+                let type = r === 1 ? 'l-top' : (r === 3 ? 'l-bottom' : 'l-mid');
+                return { face: 'L', index: r - 1, type: type };
+            }
+            if (c === 4) {
+                let type = r === 1 ? 'r-top' : (r === 3 ? 'r-bottom' : 'r-mid');
+                return { face: 'R', index: r - 1, type: type };
+            }
+            return { face: 'U', index: (r - 1) * 3 + (c - 1), type: 'u' };
+        }
+
+        function initPlanDOM(containerId, clickCallback) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            for (let r = 0; r < 5; r++) {
+                for (let c = 0; c < 5; c++) {
+                    const cell = document.createElement('div');
+                    let pos = getPlanPos(r, c);
+                    if (pos) {
+                        cell.className = 'plan-cell';
+                        if (pos.type === 'u') cell.classList.add('face-u');
+                        else cell.classList.add(`face-${pos.type}`);
+                        
+                        cell.dataset.face = pos.face;
+                        cell.dataset.index = pos.index;
+                        cell.style.background = '#444';
+                        if (clickCallback) {
+                            cell.onclick = () => clickCallback(cell);
+                        }
+                    } else {
+                        cell.className = 'plan-cell not-used';
+                    }
+                    container.appendChild(cell);
+                }
+            }
+        }
+
+        initPlanDOM('editorPlan', (cell) => {
+            cell.style.background = currentColor;
+            saveCurrentEditingState();
+        });
+
+        function selectColor(color, element) {
+            currentColor = color;
+            document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+
+        function createNewOll() {
+            const nameInput = document.getElementById('ollName');
+            const algoInput = document.getElementById('ollAlgo');
+            const name = nameInput.value.trim() || 'OLL';
+            const algo = algoInput.value.trim();
+            
+            const defaultPlan = () => ({
+                'U': Array(9).fill('#444'),
+                'F': Array(3).fill('#444'),
+                'B': Array(3).fill('#444'),
+                'L': Array(3).fill('#444'),
+                'R': Array(3).fill('#444')
+            });
+
+            const newOll = {
+                id: Date.now(),
+                name: name,
+                algo: algo,
+                cp: {
+                    "無交換(H,Ua,Ub,Z)": defaultPlan(),
+                    "対角交換(Na,Nb,V,Y)": defaultPlan(),
+                    "ヘッドライト(F面)": defaultPlan(),
+                    "ヘッドライト(B面)": defaultPlan(),
+                    "ヘッドライト(L面)": defaultPlan(),
+                    "ヘッドライト(R面)": defaultPlan()
+                },
+                memos: {
+                    "無交換(H,Ua,Ub,Z)": "",
+                    "対角交換(Na,Nb,V,Y)": "",
+                    "ヘッドライト(F面)": "",
+                    "ヘッドライト(B面)": "",
+                    "ヘッドライト(L面)": "",
+                    "ヘッドライト(R面)": ""
+                }
+            };
+
+            ollList.push(newOll);
+            saveStorage();
+            nameInput.value = '';
+            algoInput.value = '';
+            
+            switchView('grid');
+        }
+
+        function saveStorage() {
+            localStorage.setItem('oll_cp_plan_v13_list', JSON.stringify(ollList));
+        }
+
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(ollList, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "oll_cp_backup.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedList = JSON.parse(e.target.result);
+                    if (Array.isArray(importedList)) {
+                        if (confirm(`データを正常に読み込みました（${importedList.length}件）。\n現在のデータと置き換えますか？`)) {
+                            ollList = importedList;
+                            saveStorage();
+                            alert('データを復元しました！');
+                            switchView('grid');
+                        }
+                    } else {
+                        alert('ファイルの形式が正しくありません。');
+                    }
+                } catch (err) {
+                    alert('JSONファイルの解析に失敗しました。');
+                }
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function renderGrid() {
+            const container = document.getElementById('gridContainer');
+            container.innerHTML = '';
+
+            if (ollList.length === 0) {
+                container.innerHTML = '<p style="color:#777; grid-column: 1/-1; text-align:center;">まだ登録されたデータがありません。「新規登録」タブから追加してください。</p>';
+                return;
+            }
+
+            ollList.forEach(oll => {
+                const card = document.createElement('div');
+                card.className = 'oll-grid-card';
+                card.onclick = () => {
+                    openDetail(oll.id);
+                    switchView('detail');
+                };
+
+                let thumbHtml = '<div class="thumb-wrapper"><div class="mini-plan" style="transform: scale(1.1);">';
+                const planData = oll.cp["無交換(H,Ua,Ub,Z)"] || oll.cp["無交換"] || { 'U': Array(9).fill('#444'), 'F':Array(3).fill('#444'), 'B':Array(3).fill('#444'), 'L':Array(3).fill('#444'), 'R':Array(3).fill('#444') };
+                
+                for (let r = 0; r < 5; r++) {
+                    for (let c = 0; c < 5; c++) {
+                        let pos = getPlanPos(r, c);
+                        if (pos) {
+                            let cls = pos.type === 'u' ? '' : `mini-${pos.type}`;
+                            let color = planData[pos.face][pos.index];
+                            thumbHtml += `<div class="mini-cell ${cls}" style="background:${color};"></div>`;
+                        } else {
+                            thumbHtml += `<div class="mini-cell" style="visibility:hidden;"></div>`;
+                        }
+                    }
+                }
+                thumbHtml += '</div></div>';
+
+                const cleanAlgo = (oll.algo || '手順なし').replace(/[\r\n]+/g, ' ');
+
+                card.innerHTML = `
+                    ${thumbHtml}
+                    <div class="grid-card-title">${oll.name || 'OLL'}</div>
+                    <div class="grid-card-algo">${cleanAlgo}</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function openDetail(id) {
+            selectedOllId = id;
+            const original = ollList.find(o => o.id === selectedOllId);
+            if (original) {
+                workingOllData = JSON.parse(JSON.stringify(original));
+                
+                const defaultPlan = () => ({
+                    'U': Array(9).fill('#444'),
+                    'F': Array(3).fill('#444'),
+                    'B': Array(3).fill('#444'),
+                    'L': Array(3).fill('#444'),
+                    'R': Array(3).fill('#444')
+                });
+                
+                if (!workingOllData.cp) {
+                    workingOllData.cp = {};
+                }
+                const requiredKeys = ["無交換(H,Ua,Ub,Z)", "対角交換(Na,Nb,V,Y)", "ヘッドライト(F面)", "ヘッドライト(B面)", "ヘッドライト(L面)", "ヘッドライト(R面)"];
+                const keyMap = {
+                    "無交換": "無交換(H,Ua,Ub,Z)",
+                    "対角交換": "対角交換(Na,Nb,V,Y)",
+                    "F": "ヘッドライト(F面)",
+                    "B": "ヘッドライト(B面)",
+                    "L": "ヘッドライト(L面)",
+                    "R": "ヘッドライト(R面)"
+                };
+                
+                requiredKeys.forEach(key => {
+                    if (!workingOllData.cp[key]) {
+                        let foundOld = false;
+                        for (let oldK in keyMap) {
+                            if (keyMap[oldK] === key && workingOllData.cp[oldK]) {
+                                workingOllData.cp[key] = workingOllData.cp[oldK];
+                                foundOld = true;
+                                break;
+                            }
+                        }
+                        if (!foundOld) {
+                            workingOllData.cp[key] = defaultPlan();
+                        }
+                    }
+                });
+
+                if (!workingOllData.memos) {
+                    workingOllData.memos = {};
+                }
+                requiredKeys.forEach(key => {
+                    if (workingOllData.memos[key] === undefined) {
+                        let oldVal = "";
+                        for (let oldK in keyMap) {
+                            if (keyMap[oldK] === key && workingOllData.memos[oldK] !== undefined) {
+                                oldVal = workingOllData.memos[oldK];
+                                break;
+                            }
+                        }
+                        workingOllData.memos[key] = oldVal;
+                    }
+                });
+            }
+            isEdited = false;
+        }
+
+        function renderDetailView() {
+            const oll = workingOllData;
+            if (!oll) {
+                switchView('grid');
+                return;
+            }
+
+            const nameTextarea = document.getElementById('detailName');
+            nameTextarea.value = oll.name || '';
+            autoResizeTextarea(nameTextarea);
+            
+            const algoTextarea = document.getElementById('detailAlgo');
+            algoTextarea.value = oll.algo || '';
+            autoResizeTextarea(algoTextarea);
+
+            const tableContainer = document.getElementById('detailTableContainer');
+            if (tableContainer) {
+                tableContainer.innerHTML = `
+                    <table>
+                        <tr>
+                            <th>無交換(H,Ua,Ub,Z)</th>
+                            <th>対角交換(Na,Nb,V,Y)</th>
+                        </tr>
+                        <tr>
+                            <td>${createCellTD(oll, '無交換(H,Ua,Ub,Z)')}</td>
+                            <td>${createCellTD(oll, '対角交換(Na,Nb,V,Y)')}</td>
+                        </tr>
+                        <tr>
+                            <th>ヘッドライト(F面)</th>
+                            <th>ヘッドライト(B面)</th>
+                        </tr>
+                        <tr>
+                            <td>${createCellTD(oll, 'ヘッドライト(F面)')}</td>
+                            <td>${createCellTD(oll, 'ヘッドライト(B面)')}</td>
+                        </tr>
+                        <tr>
+                            <th>ヘッドライト(L面)</th>
+                            <th>ヘッドライト(R面)</th>
+                        </tr>
+                        <tr>
+                            <td>${createCellTD(oll, 'ヘッドライト(L面)')}</td>
+                            <td>${createCellTD(oll, 'ヘッドライト(R面)')}</td>
+                        </tr>
+                    </table>
+                `;
+            }
+
+            document.querySelectorAll('.memo-textarea').forEach(ta => autoResizeTextarea(ta));
+        }
+
+        function createCellTD(oll, cpKey) {
+            const planData = oll.cp[cpKey] || { 'U': Array(9).fill('#444'), 'F': Array(3).fill('#444'), 'B': Array(3).fill('#444'), 'L': Array(3).fill('#444'), 'R': Array(3).fill('#444') };
+            const memoText = (oll.memos && oll.memos[cpKey]) ? oll.memos[cpKey] : '';
+
+            let html = `<div class="table-cell-container">`;
+            
+            html += `<div class="table-cell-content" onclick="openEditorForWorking('${cpKey}')">`;
+            html += '<div class="mini-plan">';
+            
+            for (let r = 0; r < 5; r++) {
+                for (let c = 0; c < 5; c++) {
+                    let pos = getPlanPos(r, c);
+                    if (pos) {
+                        let cls = pos.type === 'u' ? '' : `mini-${pos.type}`;
+                        let color = planData[pos.face][pos.index];
+                        html += `<div class="mini-cell ${cls}" style="background:${color};"></div>`;
+                    } else {
+                        html += `<div class="mini-cell" style="visibility:hidden;"></div>`;
+                    }
+                }
+            }
+            html += '</div>';
+            html += `<span style="font-size:11px; color:#aaa; margin-top:6px; display:block; text-align:center;">${cpKey}<br>(タップして編集)</span>`;
+            html += `</div>`;
+
+            html += `<textarea class="memo-textarea" placeholder="備考欄" rows="1" autocomplete="off" data-lpignore="true" oninput="updateMemo('${cpKey}', this); markAsEdited(); autoResizeTextarea(this);">${memoText}</textarea>`;
+
+            html += `</div>`;
+            return html;
+        }
+
+        function updateMemo(cpKey, textarea) {
+            if (!workingOllData) return;
+            if (!workingOllData.memos) {
+                workingOllData.memos = {};
+            }
+            workingOllData.memos[cpKey] = textarea.value;
+        }
+
+        function markAsEdited() {
+            isEdited = true;
+            if (workingOllData) {
+                workingOllData.name = document.getElementById('detailName').value;
+                workingOllData.algo = document.getElementById('detailAlgo').value;
+            }
+        }
+
+        function openEditorForWorking(cpKey) {
+            activeCpKey = cpKey;
+            
+            const oll = workingOllData;
+            document.getElementById('editingTitle').innerText = ` [ ${cpKey} ] の色を編集中`;
+            document.getElementById('editorCard').style.display = 'block';
+            document.getElementById('editorCard').scrollIntoView({ behavior: 'smooth' });
+
+            const planData = oll.cp[cpKey];
+            const cells = document.getElementById('editorPlan').children;
+            for (let cell of cells) {
+                let face = cell.dataset.face;
+                let index = cell.dataset.index;
+                if (face && index !== undefined) {
+                    cell.style.background = planData[face][index];
+                }
+            }
+        }
+
+        function saveCurrentEditingState() {
+            if (!workingOllData || !activeCpKey) return;
+            isEdited = true;
+            const cells = document.getElementById('editorPlan').children;
+            
+            let newPlan = {
+                'U': Array(9).fill('#444'),
+                'F': Array(3).fill('#444'),
+                'B': Array(3).fill('#444'),
+                'L': Array(3).fill('#444'),
+                'R': Array(3).fill('#444')
+            };
+
+            for (let cell of cells) {
+                let face = cell.dataset.face;
+                let index = cell.dataset.index;
+                if (face && index !== undefined) {
+                    newPlan[face][index] = cell.style.background;
+                }
+            }
+            workingOllData.cp[activeCpKey] = newPlan;
+            renderDetailView();
+        }
+
+        function closeEditor() {
+            document.getElementById('editorCard').style.display = 'none';
+            activeCpKey = null;
+        }
+
+        function saveAndReturn() {
+            if (!workingOllData) return;
+            workingOllData.name = document.getElementById('detailName').value;
+            workingOllData.algo = document.getElementById('detailAlgo').value;
+
+            const index = ollList.findIndex(o => o.id === selectedOllId);
+            if (index !== -1) {
+                ollList[index] = JSON.parse(JSON.stringify(workingOllData));
+                saveStorage();
+            }
+            isEdited = false;
+            closeEditor(); // 保存して戻る時もエディターを閉じる
+            switchView('grid');
+        }
+
+        function tryReturnGrid() {
+            if (isEdited) {
+                const answer = confirm("変更が加えられています。\n保存せずに閉じますか？\n\n[OK]: 破棄して閉じる\n[キャンセル]: 編集画面に戻る");
+                if (!answer) {
+                    return;
+                }
+            }
+            isEdited = false;
+            closeEditor(); // リストに戻る時にエディターを確実に閉じる
+            switchView('grid');
+        }
+
+        function deleteActiveOll() {
+            if(confirm('このデータを削除しますか？')) {
+                ollList = ollList.filter(o => o.id !== selectedOllId);
+                saveStorage();
+                isEdited = false;
+                closeEditor(); // 削除時もエディターを閉じる
+                switchView('grid');
+            }
+        }
+
+        const originalSwitchView = switchView;
+        window.switchView = function(viewName) {
+            if (viewName === 'detail' && selectedOllId) {
+                openDetail(selectedOllId);
+            }
+            originalSwitchView(viewName);
+        };
+
+        renderGrid();
+    </script>
+
+</body>
+</html>
