@@ -407,7 +407,7 @@
                 algo: algo,
                 cp: {
                     "無交換(H,Ua,Ub,Z)": defaultPlan(),
-                    "対角交換(Na,Nb,V,Y)": defaultPlan(),
+                    "対角交換(E,Na,Nb,V,Y)": defaultPlan(),
                     "ヘッドライト(F面)": defaultPlan(),
                     "ヘッドライト(B面)": defaultPlan(),
                     "ヘッドライト(L面)": defaultPlan(),
@@ -415,7 +415,7 @@
                 },
                 memos: {
                     "無交換(H,Ua,Ub,Z)": "",
-                    "対角交換(Na,Nb,V,Y)": "",
+                    "対角交換(E,Na,Nb,V,Y)": "",
                     "ヘッドライト(F面)": "",
                     "ヘッドライト(B面)": "",
                     "ヘッドライト(L面)": "",
@@ -533,10 +533,10 @@
                 if (!workingOllData.cp) {
                     workingOllData.cp = {};
                 }
-                const requiredKeys = ["無交換(H,Ua,Ub,Z)", "対角交換(Na,Nb,V,Y)", "ヘッドライト(F面)", "ヘッドライト(B面)", "ヘッドライト(L面)", "ヘッドライト(R面)"];
+                const requiredKeys = ["無交換(H,Ua,Ub,Z)", "対角交換(E,Na,Nb,V,Y)", "ヘッドライト(F面)", "ヘッドライト(B面)", "ヘッドライト(L面)", "ヘッドライト(R面)"];
                 const keyMap = {
                     "無交換": "無交換(H,Ua,Ub,Z)",
-                    "対角交換": "対角交換(Na,Nb,V,Y)",
+                    "対角交換": "対角交換(E,Na,Nb,V,Y)",
                     "F": "ヘッドライト(F面)",
                     "B": "ヘッドライト(B面)",
                     "L": "ヘッドライト(L面)",
@@ -599,11 +599,11 @@
                     <table>
                         <tr>
                             <th>無交換(H,Ua,Ub,Z)</th>
-                            <th>対角交換(Na,Nb,V,Y)</th>
+                            <th>対角交換(E,Na,Nb,V,Y)</th>
                         </tr>
                         <tr>
                             <td>${createCellTD(oll, '無交換(H,Ua,Ub,Z)')}</td>
-                            <td>${createCellTD(oll, '対角交換(Na,Nb,V,Y)')}</td>
+                            <td>${createCellTD(oll, '対角交換(E,Na,Nb,V,Y)')}</td>
                         </tr>
                         <tr>
                             <th>ヘッドライト(F面)</th>
