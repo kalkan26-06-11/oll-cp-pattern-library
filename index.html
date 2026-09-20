@@ -8,13 +8,11 @@
         body { font-family: sans-serif; max-width: 800px; margin: 10px auto; padding: 10px; padding-bottom: 70px; background: #111; color: #fff; box-sizing: border-box; }
         .card { background: #222; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #444; box-sizing: border-box; }
         
-        /* input用のスタイルからtextarea用に転用、または共用 */
         input, textarea { padding: 8px; width: 100%; box-sizing: border-box; margin-bottom: 10px; background: #333; color: #fff; border: 1px solid #555; font-family: sans-serif; }
         
         button { background: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 14px; }
         button:hover { background: #0056b3; }
         
-        /* 右下に固定するボタンのコンテナ（保存とリストに戻るを並べる用） */
         .float-btn-container { 
             position: fixed; 
             bottom: 20px; 
@@ -39,22 +37,18 @@
         .float-btn-save { background: #28a745; }
         .float-btn-save:hover { background: #218838; }
 
-        /* ナビゲーションタブ風ヘッダー（3つ均等配置） */
         .nav-header { display: flex; gap: 8px; margin-bottom: 15px; }
         .nav-btn { flex: 1; padding: 10px 5px; background: #222; border: 1px solid #444; color: #aaa; text-align: center; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-sizing: border-box; }
         .nav-btn.active { background: #007bff; color: #fff; border-color: #007bff; }
 
-        /* グリッドカードリスト（3列固定・はみ出し防止） */
         .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .oll-grid-card { background: #1a1a1a; border: 2px solid #444; border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; transition: 0.2s; box-sizing: border-box; min-width: 0; overflow: hidden; }
+        .oll-grid-card { background: #1a1a1a; border: 2px solid #444; border-radius: 8px; padding: 8px 6px; text-align: center; cursor: pointer; transition: 0.2s; box-sizing: border-box; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: space-between; overflow: hidden; }
         .oll-grid-card:hover { border-color: #007bff; background: #222; transform: translateY(-2px); }
         
-        /* サムネイル図を中央に配置するラッパー */
-        .thumb-wrapper { display: flex; justify-content: center; width: 100%; margin: 6px 0; }
+        .thumb-wrapper { display: flex; justify-content: center; width: 100%; margin: 0; overflow: hidden; }
 
-        .grid-card-title { font-size: 13px; font-weight: bold; margin: 6px 0 2px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .grid-card-title { font-size: 12px; font-weight: bold; margin: 4px 0 2px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
         
-        /* 一覧のアルゴリズム表示を確実に1行に省略させるスタイル修正 */
         .grid-card-algo { 
             font-size: 10px; 
             color: #888; 
@@ -68,11 +62,24 @@
         }
 
         /* カラーパレット */
-        .color-palette { display: flex; gap: 8px; margin: 10px 0; justify-content: center; }
-        .color-btn { width: 30px; height: 30px; border: 2px solid #555; cursor: pointer; border-radius: 4px; }
-        .color-btn.selected { border: 3px solid #fff; transform: scale(1.1); }
+        .color-palette-container { display: flex; flex-direction: column; gap: 6px; margin: 10px 0; align-items: center; }
+        .color-palette-row { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; width: 100%; min-height: 34px; align-items: center; }
+        
+        .color-btn { 
+            width: 32px; 
+            height: 32px; 
+            border: 2px solid #555; 
+            cursor: pointer; 
+            border-radius: 4px; 
+            position: relative; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            background-clip: padding-box; 
+        }
+        .color-btn.selected { border: 3px solid #fff; transform: scale(1.15); z-index: 2; }
 
-        /* キューブプランビュー全体 */
+        /* キューブプランビュー全体（エディター用） */
         .cube-plan { 
             display: grid; 
             grid-template-columns: 32px 48px 48px 48px 32px; 
@@ -84,12 +91,10 @@
             margin: 10px auto; 
             border-radius: 4px;
         }
-        .plan-cell { background: #444; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .plan-cell { background: #444; cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative; }
         
-        /* 中央のU面 */
         .face-u { border-radius: 1px; }
 
-        /* 外側に向かって広がる正しいパース（全方向統一） */
         .face-b-left { clip-path: polygon(15% 0, 100% 0, 100% 100%, 0 100%); }
         .face-b-mid  { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
         .face-b-right{ clip-path: polygon(0 0, 85% 0, 100% 100%, 0 100%); }
@@ -105,50 +110,169 @@
 
         .not-used { visibility: hidden; }
 
-        /* CPテンプレート表 */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: #222; }
-        th, td { border: 1px solid #444; padding: 8px; text-align: center; width: 50%; vertical-align: top; }
-        th { background: #333; font-size: 14px; color: #ddd; }
-        
-        /* セルの表示コンテナ */
-        .table-cell-container { display: flex; flex-direction: column; align-items: center; width: 100%; box-sizing: border-box; }
-        .table-cell-content { cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding: 4px; box-sizing: border-box; }
-        .table-cell-content:hover { background: #2a2a2a; border-radius: 4px; }
+        /* セル内のマーク（エディター用） */
+        .cell-mark-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .cell-mark-circle {
+            position: absolute;
+            font-size: 32px;
+            font-weight: 500;
+            color: #000;
+            text-shadow: 0 0 2px #fff;
+        }
+        .cell-mark-star {
+            position: absolute;
+            font-size: 26px;
+            font-weight: bold;
+            color: #000;
+            text-shadow: 0 0 2px #fff;
+        }
+        .cell-mark-circle.light-mark {
+            color: #fff;
+            text-shadow: 0 0 2px #000;
+        }
+        .cell-mark-star.light-mark {
+            color: #fff;
+            text-shadow: 0 0 2px #000;
+        }
 
-        /* ミニプランビュー（リスト・サムネイル用）を少し大きく調整 */
+        /* 詳細画面の表の中のミニプラン */
+        .mini-plan-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            margin: 4px 0;
+        }
+
         .mini-plan { 
+            display: grid; 
+            grid-template-columns: 20px 30px 30px 30px 20px; 
+            grid-template-rows: 20px 30px 30px 30px 20px;    
+            gap: 4px; 
+            background: #000; 
+            padding: 6px; 
+            border-radius: 4px;
+            box-sizing: border-box;
+            transform-origin: center;
+        }
+
+        /* リスト画面のサムネイル専用プラン */
+        .list-mini-plan { 
             display: grid; 
             grid-template-columns: 12px 18px 18px 18px 12px; 
             grid-template-rows: 12px 18px 18px 18px 12px;    
-            gap: 3px; 
+            gap: 2.4px; 
             background: #000; 
-            padding: 8px; 
+            padding: 3.6px; 
+            border-radius: 3px;
+            box-sizing: border-box;
         }
 
-        .mini-cell { background: #444; }
+        .mini-cell { background: #444; position: relative; display: flex; align-items: center; justify-content: center; }
         
-        /* ミニ版の正しいクリップパス適用 */
-        .mini-b-left { clip-path: polygon(15% 0, 100% 0, 100% 100%, 0 100%); }
-        .mini-b-mid  { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
-        .mini-b-right{ clip-path: polygon(0 0, 85% 0, 100% 100%, 0 100%); }
-        .mini-f-left { clip-path: polygon(0 0, 100% 0, 100% 100%, 15% 100%); }
-        .mini-f-mid  { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
-        .mini-f-right{ clip-path: polygon(0 0, 100% 0, 85% 100%, 0 100%); }
-        .mini-l-top    { clip-path: polygon(0 15%, 100% 0, 100% 100%, 0 100%); }
-        .mini-l-mid    { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
-        .mini-l-bottom { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 85%); }
-        .mini-r-top    { clip-path: polygon(0 0, 100% 15%, 100% 100%, 0 100%); }
-        .mini-r-mid    { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
-        .mini-r-bottom { clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%); }
+        .mini-b-left, .list-mini-b-left { clip-path: polygon(15% 0, 100% 0, 100% 100%, 0 100%); }
+        .mini-b-mid, .list-mini-b-mid   { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+        .mini-b-right, .list-mini-b-right{ clip-path: polygon(0 0, 85% 0, 100% 100%, 0 100%); }
+        .mini-f-left, .list-mini-f-left { clip-path: polygon(0 0, 100% 0, 100% 100%, 15% 100%); }
+        .mini-f-mid, .list-mini-f-mid   { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+        .mini-f-right, .list-mini-f-right{ clip-path: polygon(0 0, 100% 0, 85% 100%, 0 100%); }
+        .mini-l-top, .list-mini-l-top    { clip-path: polygon(0 15%, 100% 0, 100% 100%, 0 100%); }
+        .mini-l-mid, .list-mini-l-mid    { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+        .mini-l-bottom, .list-mini-l-bottom { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 85%); }
+        .mini-r-top, .list-mini-r-top    { clip-path: polygon(0 0, 100% 15%, 100% 100%, 0 100%); }
+        .mini-r-mid, .list-mini-r-mid    { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+        .mini-r-bottom, .list-mini-r-bottom { clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%); }
+
+        /* ミニセル内のマーク（詳細画面用） */
+        .mini-cell-mark-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .mini-cell-mark-circle {
+            position: absolute;
+            font-size: 20px;
+            font-weight: 500;
+            color: #000;
+            text-shadow: 0 0 1px #fff;
+        }
+        .mini-cell-mark-star {
+            position: absolute;
+            font-size: 16px;
+            font-weight: bold;
+            color: #000;
+            text-shadow: 0 0 1px #fff;
+        }
+        .mini-cell-mark-circle.light-mark {
+            color: #fff;
+            text-shadow: 0 0 1px #000;
+        }
+        .mini-cell-mark-star.light-mark {
+            color: #fff;
+            text-shadow: 0 0 1px #000;
+        }
+
+        /* リストサムネイル専用のマーク */
+        .list-cell-mark-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .list-cell-mark-circle {
+            position: absolute;
+            font-size: 12px;
+            font-weight: 500;
+            color: #000;
+            text-shadow: 0 0 1px #fff;
+        }
+        .list-cell-mark-star {
+            position: absolute;
+            font-size: 9.6px;
+            font-weight: bold;
+            color: #000;
+            text-shadow: 0 0 1px #fff;
+        }
+        .list-cell-mark-circle.light-mark {
+            color: #fff;
+            text-shadow: 0 0 1px #000;
+        }
+        .list-cell-mark-star.light-mark {
+            color: #fff;
+            text-shadow: 0 0 1px #000;
+        }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: #222; table-layout: fixed; }
+        th, td { border: 1px solid #444; padding: 6px; text-align: center; width: 50%; vertical-align: top; overflow: hidden; box-sizing: border-box; }
+        th { background: #333; font-size: 13px; color: #ddd; word-break: break-all; }
+        
+        .table-cell-container { display: flex; flex-direction: column; align-items: center; width: 100%; box-sizing: border-box; }
+        .table-cell-content { cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding: 2px; box-sizing: border-box; }
+        .table-cell-content:hover { background: #2a2a2a; border-radius: 4px; }
 
         .algorithm-input { font-family: monospace; white-space: pre-wrap; word-break: break-all; resize: none; overflow-y: hidden; }
         .detail-textarea { font-family: monospace; white-space: pre-wrap; word-break: break-all; resize: none; overflow-y: hidden; }
         .new-textarea { font-family: sans-serif; white-space: pre-wrap; word-break: break-all; resize: none; overflow-y: hidden; }
         
-        /* 備考欄用textareaのスタイル */
         .memo-textarea {
             width: 100%;
-            margin-top: 8px;
+            margin-top: 6px;
             padding: 6px;
             font-size: 11px;
             background: #252525;
@@ -179,7 +303,6 @@
 </head>
 <body>
 
-    <!-- 画面切り替えタブ（リスト・新規登録・バックアップ用） -->
     <div class="nav-header" id="mainNav">
         <div class="nav-btn active" id="tabGrid" onclick="switchView('grid')">パターン表リスト</div>
         <div class="nav-btn" id="tabNew" onclick="switchView('new')">新規登録</div>
@@ -195,7 +318,7 @@
         </div>
     </div>
 
-    <!-- VIEW 2: 新規登録画面（inputからtextareaに変更してパスワードマネージャーを回避） -->
+    <!-- VIEW 2: 新規登録画面 -->
     <div id="viewNew" class="view-section">
         <div class="card">
             <h2>新規パターン表登録</h2>
@@ -229,16 +352,15 @@
         </div>
     </div>
 
-    <!-- VIEW 3: 詳細・表・エディター画面（別画面） -->
+    <!-- VIEW 3: 詳細・表・エディター画面 -->
     <div id="viewDetail" class="view-section">
-        <!-- 右下に固定するボタンのコンテナ -->
         <div class="float-btn-container">
             <button class="float-btn-delete" onclick="deleteActiveOll()">削除</button>
             <button class="float-btn float-btn-save" onclick="saveAndReturn()">保存</button>
             <button class="float-btn" onclick="tryReturnGrid()">リストに戻る</button>
         </div>
         
-        <div class="card" style="border: 2px solid #007bff;">
+        <div class="card" id="detailCardMain" style="border: 2px solid #007bff;">
             <div style="margin-bottom: 8px;">
                 <textarea id="detailName" rows="1" autocomplete="off" data-lpignore="true" style="width: 100%; height: auto; resize: none; overflow-y: hidden; margin-bottom:0; padding: 5px 8px; font-size: 15px; font-weight: bold; box-sizing: border-box; background: #333; color: #fff; border: 1px solid #555;" placeholder="OLL名" oninput="markAsEdited(); autoResizeTextarea(this);"></textarea>
             </div>
@@ -249,34 +371,39 @@
             <div id="detailTableContainer"></div>
         </div>
 
-        <!-- パターン編集用エディターカード（詳細画面内） -->
+        <!-- パターン編集用エディターカード -->
         <div class="card" id="editorCard" style="border: 2px solid #28a745; display:none;">
             <h3 id="editingTitle" style="margin-top:0; color:#28a745;">パターン編集中</h3>
-            <p style="font-size: 12px; color: #aaa; margin: 5px 0;">色を選んでキューブのマスをタップしてください</p>
+            <p style="font-size: 12px; color: #aaa; margin: 5px 0;">下のパレットから状態を選んでキューブのマスをタップしてください</p>
             
-            <div class="color-palette">
-                <div class="color-btn selected" style="background: yellow;" onclick="selectColor('yellow', this)"></div>
-                <div class="color-btn" style="background: green;" onclick="selectColor('green', this)"></div>
-                <div class="color-btn" style="background: red;" onclick="selectColor('red', this)"></div>
-                <div class="color-btn" style="background: orange;" onclick="selectColor('orange', this)"></div>
-                <div class="color-btn" style="background: blue;" onclick="selectColor('blue', this)"></div>
-                <div class="color-btn" style="background: white;" onclick="selectColor('white', this)"></div>
-                <div class="color-btn" style="background: #444;" onclick="selectColor('#444', this)" title="未配色・グレー"></div>
-            </div>
+            <!-- パレット -->
+            <div class="color-palette-container" id="paletteContainer"></div>
 
             <div class="cube-plan" id="editorPlan"></div>
-            <button onclick="closeEditor()" style="background: #28a745; width:100%; margin-top:10px;">色編集を完了する</button>
+            <button onclick="closeEditor()" style="background: #28a745; width:100%; margin-top:10px;">色・マーク編集を完了する</button>
         </div>
     </div>
 
     <script>
-        let ollList = JSON.parse(localStorage.getItem('oll_cp_plan_v13_list')) || [];
-        let currentColor = 'yellow';
+        let ollList = JSON.parse(localStorage.getItem('oll_cp_plan_v14_list')) || [];
+        
+        let currentBrush = { color: 'yellow', hasCircle: false, hasTriangle: false };
+        
         let selectedOllId = null;
         let activeEditorOllId = null;
         let activeCpKey = null;
         let isEdited = false;
         let workingOllData = null;
+        let scrollPositionBeforeEdit = 0; // スクロール位置記憶用変数
+
+        const baseColors = ['yellow', 'green', 'red', 'orange', 'blue', 'white', '#444'];
+        
+        const patternTypes = [
+            { hasCircle: false, hasTriangle: false },
+            { hasCircle: true, hasTriangle: false },
+            { hasCircle: false, hasTriangle: true },
+            { hasCircle: true, hasTriangle: true }
+        ];
 
         function autoResizeTextarea(textarea) {
             if (!textarea) return;
@@ -299,7 +426,7 @@
             if (viewName === 'grid') {
                 document.getElementById('viewGrid').classList.add('active');
                 document.getElementById('tabGrid').classList.add('active');
-                closeEditor(); // 念のためグリッドに戻る時もエディターを閉じる
+                closeEditor();
                 renderGrid();
             } else if (viewName === 'new') {
                 document.getElementById('viewNew').classList.add('active');
@@ -315,7 +442,7 @@
             } else if (viewName === 'detail') {
                 document.getElementById('viewDetail').classList.add('active');
                 document.getElementById('mainNav').style.display = 'none';
-                closeEditor(); // 別の表を開く時に直前のエディターが開かないように必ず閉じる
+                closeEditor();
                 renderDetailView();
                 setTimeout(() => {
                     const nameTa = document.getElementById('detailName');
@@ -323,6 +450,7 @@
                     if (nameTa) autoResizeTextarea(nameTa);
                     if (algoTa) autoResizeTextarea(algoTa);
                     document.querySelectorAll('.memo-textarea').forEach(ta => autoResizeTextarea(ta));
+                    adjustMiniPlansScale();
                 }, 50);
             }
 
@@ -350,6 +478,73 @@
             return { face: 'U', index: (r - 1) * 3 + (c - 1), type: 'u' };
         }
 
+        function getMarksHtml(color, hasCircle, hasTriangle, isMini = false, isList = false) {
+            if (!hasCircle && !hasTriangle) return '';
+            
+            const isLightColor = (color === 'green' || color === 'blue');
+            const lightClass = isLightColor ? ' light-mark' : '';
+
+            let layerClass = 'cell-mark-layer';
+            let circleClass = 'cell-mark-circle';
+            let starClass = 'cell-mark-star';
+
+            if (isList) {
+                layerClass = 'list-cell-mark-layer';
+                circleClass = 'list-cell-mark-circle';
+                starClass = 'list-cell-mark-star';
+            } else if (isMini) {
+                layerClass = 'mini-cell-mark-layer';
+                circleClass = 'mini-cell-mark-circle';
+                starClass = 'mini-cell-mark-star';
+            }
+
+            let html = `<div class="${layerClass}">`;
+            if (hasCircle) {
+                html += `<span class="${circleClass}${lightClass}">〇</span>`;
+            }
+            if (hasTriangle) {
+                html += `<span class="${starClass}${lightClass}">☆</span>`;
+            }
+            html += `</div>`;
+            return html;
+        }
+
+        function renderPalette() {
+            const container = document.getElementById('paletteContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            patternTypes.forEach((pat, rowIndex) => {
+                const row = document.createElement('div');
+                row.className = 'color-palette-row';
+
+                baseColors.forEach(color => {
+                    if ((color === 'yellow' || color === '#444') && rowIndex > 0) {
+                        return;
+                    }
+
+                    const btn = document.createElement('div');
+                    btn.className = 'color-btn';
+                    btn.style.background = color;
+
+                    btn.innerHTML = getMarksHtml(color, pat.hasCircle, pat.hasTriangle, false);
+
+                    if (currentBrush.color === color && currentBrush.hasCircle === pat.hasCircle && currentBrush.hasTriangle === pat.hasTriangle) {
+                        btn.classList.add('selected');
+                    }
+
+                    btn.onclick = () => {
+                        currentBrush = { color: color, hasCircle: pat.hasCircle, hasTriangle: pat.hasTriangle };
+                        renderPalette();
+                    };
+
+                    row.appendChild(btn);
+                });
+
+                container.appendChild(row);
+            });
+        }
+
         function initPlanDOM(containerId, clickCallback) {
             const container = document.getElementById(containerId);
             container.innerHTML = '';
@@ -364,7 +559,6 @@
                         
                         cell.dataset.face = pos.face;
                         cell.dataset.index = pos.index;
-                        cell.style.background = '#444';
                         if (clickCallback) {
                             cell.onclick = () => clickCallback(cell);
                         }
@@ -377,14 +571,53 @@
         }
 
         initPlanDOM('editorPlan', (cell) => {
-            cell.style.background = currentColor;
+            setCellData(cell, currentBrush);
             saveCurrentEditingState();
         });
 
-        function selectColor(color, element) {
-            currentColor = color;
-            document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('selected'));
-            element.classList.add('selected');
+        function setCellData(cellElement, cellData) {
+            if (cellData.color === 'yellow' || cellData.color === '#444') {
+                cellData.hasCircle = false;
+                cellData.hasTriangle = false;
+            }
+
+            cellElement.style.background = cellData.color;
+            cellElement.dataset.color = cellData.color;
+            cellElement.dataset.hasCircle = cellData.hasCircle ? 'true' : 'false';
+            cellElement.dataset.hasTriangle = cellData.hasTriangle ? 'true' : 'false';
+
+            cellElement.querySelectorAll('.cell-mark-layer').forEach(el => el.remove());
+            
+            let marksHtml = getMarksHtml(cellData.color, cellData.hasCircle, cellData.hasTriangle, false);
+            if (marksHtml) {
+                cellElement.insertAdjacentHTML('beforeend', marksHtml);
+            }
+        }
+
+        function normalizeCellData(val) {
+            if (typeof val === 'string') {
+                return { color: val, hasCircle: false, hasTriangle: false };
+            }
+            if (val && typeof val === 'object') {
+                let col = val.color || '#444';
+                let hasC = (col === 'yellow' || col === '#444') ? false : !!val.hasCircle;
+                let hasT = (col === 'yellow' || col === '#444') ? false : !!val.hasTriangle;
+                return {
+                    color: col,
+                    hasCircle: hasC,
+                    hasTriangle: hasT
+                };
+            }
+            return { color: '#444', hasCircle: false, hasTriangle: false };
+        }
+
+        function createDefaultPlan() {
+            let plan = {};
+            ['U', 'F', 'B', 'L', 'R'].forEach(face => {
+                let count = (face === 'U') ? 9 : 3;
+                plan[face] = Array(count).fill(null).map(() => ({ color: '#444', hasCircle: false, hasTriangle: false }));
+            });
+            return plan;
         }
 
         function createNewOll() {
@@ -392,26 +625,18 @@
             const algoInput = document.getElementById('ollAlgo');
             const name = nameInput.value.trim() || 'OLL';
             const algo = algoInput.value.trim();
-            
-            const defaultPlan = () => ({
-                'U': Array(9).fill('#444'),
-                'F': Array(3).fill('#444'),
-                'B': Array(3).fill('#444'),
-                'L': Array(3).fill('#444'),
-                'R': Array(3).fill('#444')
-            });
 
             const newOll = {
                 id: Date.now(),
                 name: name,
                 algo: algo,
                 cp: {
-                    "無交換(H,Ua,Ub,Z)": defaultPlan(),
-                    "対角交換(E,Na,Nb,V,Y)": defaultPlan(),
-                    "ヘッドライト(F面)": defaultPlan(),
-                    "ヘッドライト(B面)": defaultPlan(),
-                    "ヘッドライト(L面)": defaultPlan(),
-                    "ヘッドライト(R面)": defaultPlan()
+                    "無交換(H,Ua,Ub,Z)": createDefaultPlan(),
+                    "対角交換(E,Na,Nb,V,Y)": createDefaultPlan(),
+                    "ヘッドライト(F面)": createDefaultPlan(),
+                    "ヘッドライト(B面)": createDefaultPlan(),
+                    "ヘッドライト(L面)": createDefaultPlan(),
+                    "ヘッドライト(R面)": createDefaultPlan()
                 },
                 memos: {
                     "無交換(H,Ua,Ub,Z)": "",
@@ -432,7 +657,7 @@
         }
 
         function saveStorage() {
-            localStorage.setItem('oll_cp_plan_v13_list', JSON.stringify(ollList));
+            localStorage.setItem('oll_cp_plan_v14_list', JSON.stringify(ollList));
         }
 
         function exportData() {
@@ -488,16 +713,18 @@
                     switchView('detail');
                 };
 
-                let thumbHtml = '<div class="thumb-wrapper"><div class="mini-plan" style="transform: scale(1.1);">';
-                const planData = oll.cp["無交換(H,Ua,Ub,Z)"] || oll.cp["無交換"] || { 'U': Array(9).fill('#444'), 'F':Array(3).fill('#444'), 'B':Array(3).fill('#444'), 'L':Array(3).fill('#444'), 'R':Array(3).fill('#444') };
+                let thumbHtml = '<div class="thumb-wrapper"><div class="list-mini-plan">';
+                const planData = oll.cp["無交換(H,Ua,Ub,Z)"] || oll.cp["無交換"] || createDefaultPlan();
                 
                 for (let r = 0; r < 5; r++) {
                     for (let c = 0; c < 5; c++) {
                         let pos = getPlanPos(r, c);
                         if (pos) {
-                            let cls = pos.type === 'u' ? '' : `mini-${pos.type}`;
-                            let color = planData[pos.face][pos.index];
-                            thumbHtml += `<div class="mini-cell ${cls}" style="background:${color};"></div>`;
+                            let cls = pos.type === 'u' ? '' : `list-mini-${pos.type}`;
+                            let cellInfo = normalizeCellData(planData[pos.face][pos.index]);
+                            let marksHtml = getMarksHtml(cellInfo.color, cellInfo.hasCircle, cellInfo.hasTriangle, false, true);
+
+                            thumbHtml += `<div class="mini-cell ${cls}" style="background:${cellInfo.color};">${marksHtml}</div>`;
                         } else {
                             thumbHtml += `<div class="mini-cell" style="visibility:hidden;"></div>`;
                         }
@@ -522,57 +749,28 @@
             if (original) {
                 workingOllData = JSON.parse(JSON.stringify(original));
                 
-                const defaultPlan = () => ({
-                    'U': Array(9).fill('#444'),
-                    'F': Array(3).fill('#444'),
-                    'B': Array(3).fill('#444'),
-                    'L': Array(3).fill('#444'),
-                    'R': Array(3).fill('#444')
-                });
-                
-                if (!workingOllData.cp) {
-                    workingOllData.cp = {};
-                }
                 const requiredKeys = ["無交換(H,Ua,Ub,Z)", "対角交換(E,Na,Nb,V,Y)", "ヘッドライト(F面)", "ヘッドライト(B面)", "ヘッドライト(L面)", "ヘッドライト(R面)"];
-                const keyMap = {
-                    "無交換": "無交換(H,Ua,Ub,Z)",
-                    "対角交換": "対角交換(E,Na,Nb,V,Y)",
-                    "F": "ヘッドライト(F面)",
-                    "B": "ヘッドライト(B面)",
-                    "L": "ヘッドライト(L面)",
-                    "R": "ヘッドライト(R面)"
-                };
+                
+                if (!workingOllData.cp) workingOllData.cp = {};
                 
                 requiredKeys.forEach(key => {
                     if (!workingOllData.cp[key]) {
-                        let foundOld = false;
-                        for (let oldK in keyMap) {
-                            if (keyMap[oldK] === key && workingOllData.cp[oldK]) {
-                                workingOllData.cp[key] = workingOllData.cp[oldK];
-                                foundOld = true;
-                                break;
+                        workingOllData.cp[key] = createDefaultPlan();
+                    } else {
+                        ['U', 'F', 'B', 'L', 'R'].forEach(face => {
+                            if (Array.isArray(workingOllData.cp[key][face])) {
+                                workingOllData.cp[key][face] = workingOllData.cp[key][face].map(cell => normalizeCellData(cell));
+                            } else {
+                                let count = (face === 'U') ? 9 : 3;
+                                workingOllData.cp[key][face] = Array(count).fill(null).map(() => ({ color: '#444', hasCircle: false, hasTriangle: false }));
                             }
-                        }
-                        if (!foundOld) {
-                            workingOllData.cp[key] = defaultPlan();
-                        }
+                        });
                     }
                 });
 
-                if (!workingOllData.memos) {
-                    workingOllData.memos = {};
-                }
+                if (!workingOllData.memos) workingOllData.memos = {};
                 requiredKeys.forEach(key => {
-                    if (workingOllData.memos[key] === undefined) {
-                        let oldVal = "";
-                        for (let oldK in keyMap) {
-                            if (keyMap[oldK] === key && workingOllData.memos[oldK] !== undefined) {
-                                oldVal = workingOllData.memos[oldK];
-                                break;
-                            }
-                        }
-                        workingOllData.memos[key] = oldVal;
-                    }
+                    if (workingOllData.memos[key] === undefined) workingOllData.memos[key] = "";
                 });
             }
             isEdited = false;
@@ -626,15 +824,42 @@
             }
 
             document.querySelectorAll('.memo-textarea').forEach(ta => autoResizeTextarea(ta));
+            setTimeout(adjustMiniPlansScale, 10);
         }
 
+        function adjustMiniPlansScale() {
+            const wrappers = document.querySelectorAll('.mini-plan-wrapper');
+            wrappers.forEach(wrapper => {
+                const miniPlan = wrapper.querySelector('.mini-plan');
+                if (!miniPlan) return;
+                
+                miniPlan.style.transform = 'none';
+                const wrapperWidth = wrapper.clientWidth;
+                const planWidth = miniPlan.scrollWidth;
+
+                if (planWidth > wrapperWidth && wrapperWidth > 0) {
+                    const scale = wrapperWidth / planWidth;
+                    miniPlan.style.transform = `scale(${scale})`;
+                } else {
+                    miniPlan.style.transform = 'scale(1)';
+                }
+            });
+        }
+
+        window.addEventListener('resize', () => {
+            if (document.getElementById('viewDetail').classList.contains('active')) {
+                adjustMiniPlansScale();
+            }
+        });
+
         function createCellTD(oll, cpKey) {
-            const planData = oll.cp[cpKey] || { 'U': Array(9).fill('#444'), 'F': Array(3).fill('#444'), 'B': Array(3).fill('#444'), 'L': Array(3).fill('#444'), 'R': Array(3).fill('#444') };
+            const planData = oll.cp[cpKey] || createDefaultPlan();
             const memoText = (oll.memos && oll.memos[cpKey]) ? oll.memos[cpKey] : '';
 
             let html = `<div class="table-cell-container">`;
             
             html += `<div class="table-cell-content" onclick="openEditorForWorking('${cpKey}')">`;
+            html += `<div class="mini-plan-wrapper">`;
             html += '<div class="mini-plan">';
             
             for (let r = 0; r < 5; r++) {
@@ -642,15 +867,18 @@
                     let pos = getPlanPos(r, c);
                     if (pos) {
                         let cls = pos.type === 'u' ? '' : `mini-${pos.type}`;
-                        let color = planData[pos.face][pos.index];
-                        html += `<div class="mini-cell ${cls}" style="background:${color};"></div>`;
+                        let cellInfo = normalizeCellData(planData[pos.face][pos.index]);
+                        let marksHtml = getMarksHtml(cellInfo.color, cellInfo.hasCircle, cellInfo.hasTriangle, true, false);
+
+                        html += `<div class="mini-cell ${cls}" style="background:${cellInfo.color};">${marksHtml}</div>`;
                     } else {
                         html += `<div class="mini-cell" style="visibility:hidden;"></div>`;
                     }
                 }
             }
             html += '</div>';
-            html += `<span style="font-size:11px; color:#aaa; margin-top:6px; display:block; text-align:center;">${cpKey}<br>(タップして編集)</span>`;
+            html += '</div>';
+            html += `<span style="font-size:11px; color:#aaa; margin-top:4px; display:block; text-align:center;">${cpKey}<br>(タップして編集)</span>`;
             html += `</div>`;
 
             html += `<textarea class="memo-textarea" placeholder="備考欄" rows="1" autocomplete="off" data-lpignore="true" oninput="updateMemo('${cpKey}', this); markAsEdited(); autoResizeTextarea(this);">${memoText}</textarea>`;
@@ -661,9 +889,7 @@
 
         function updateMemo(cpKey, textarea) {
             if (!workingOllData) return;
-            if (!workingOllData.memos) {
-                workingOllData.memos = {};
-            }
+            if (!workingOllData.memos) workingOllData.memos = {};
             workingOllData.memos[cpKey] = textarea.value;
         }
 
@@ -676,12 +902,17 @@
         }
 
         function openEditorForWorking(cpKey) {
+            // エディターを開く直前のスクロール位置を記憶する
+            scrollPositionBeforeEdit = window.pageYOffset || document.documentElement.scrollTop;
+
             activeCpKey = cpKey;
             
             const oll = workingOllData;
-            document.getElementById('editingTitle').innerText = ` [ ${cpKey} ] の色を編集中`;
+            document.getElementById('editingTitle').innerText = ` [ ${cpKey} ] のパターンを編集中`;
             document.getElementById('editorCard').style.display = 'block';
             document.getElementById('editorCard').scrollIntoView({ behavior: 'smooth' });
+
+            renderPalette();
 
             const planData = oll.cp[cpKey];
             const cells = document.getElementById('editorPlan').children;
@@ -689,7 +920,8 @@
                 let face = cell.dataset.face;
                 let index = cell.dataset.index;
                 if (face && index !== undefined) {
-                    cell.style.background = planData[face][index];
+                    let cellInfo = normalizeCellData(planData[face][index]);
+                    setCellData(cell, cellInfo);
                 }
             }
         }
@@ -699,19 +931,21 @@
             isEdited = true;
             const cells = document.getElementById('editorPlan').children;
             
-            let newPlan = {
-                'U': Array(9).fill('#444'),
-                'F': Array(3).fill('#444'),
-                'B': Array(3).fill('#444'),
-                'L': Array(3).fill('#444'),
-                'R': Array(3).fill('#444')
-            };
+            let newPlan = createDefaultPlan();
 
             for (let cell of cells) {
                 let face = cell.dataset.face;
                 let index = cell.dataset.index;
                 if (face && index !== undefined) {
-                    newPlan[face][index] = cell.style.background;
+                    let col = cell.dataset.color || '#444';
+                    let hasC = (col === 'yellow' || col === '#444') ? false : (cell.dataset.hasCircle === 'true');
+                    let hasT = (col === 'yellow' || col === '#444') ? false : (cell.dataset.hasTriangle === 'true');
+
+                    newPlan[face][index] = {
+                        color: col,
+                        hasCircle: hasC,
+                        hasTriangle: hasT
+                    };
                 }
             }
             workingOllData.cp[activeCpKey] = newPlan;
@@ -721,6 +955,12 @@
         function closeEditor() {
             document.getElementById('editorCard').style.display = 'none';
             activeCpKey = null;
+
+            // 編集完了時にエディターを開く直前のスクロール位置に戻す
+            window.scrollTo({
+                top: scrollPositionBeforeEdit,
+                behavior: 'smooth'
+            });
         }
 
         function saveAndReturn() {
@@ -734,19 +974,17 @@
                 saveStorage();
             }
             isEdited = false;
-            closeEditor(); // 保存して戻る時もエディターを閉じる
+            closeEditor();
             switchView('grid');
         }
 
         function tryReturnGrid() {
             if (isEdited) {
                 const answer = confirm("変更が加えられています。\n保存せずに閉じますか？\n\n[OK]: 破棄して閉じる\n[キャンセル]: 編集画面に戻る");
-                if (!answer) {
-                    return;
-                }
+                if (!answer) return;
             }
             isEdited = false;
-            closeEditor(); // リストに戻る時にエディターを確実に閉じる
+            closeEditor();
             switchView('grid');
         }
 
@@ -755,7 +993,7 @@
                 ollList = ollList.filter(o => o.id !== selectedOllId);
                 saveStorage();
                 isEdited = false;
-                closeEditor(); // 削除時もエディターを閉じる
+                closeEditor();
                 switchView('grid');
             }
         }
