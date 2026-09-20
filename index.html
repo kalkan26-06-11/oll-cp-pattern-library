@@ -62,8 +62,8 @@
         }
 
         /* カラーパレット */
-        .color-palette-container { display: flex; flex-direction: column; gap: 6px; margin: 10px 0; align-items: center; }
-        .color-palette-row { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; width: 100%; min-height: 34px; align-items: center; }
+        .color-palette-container { display: inline-flex; flex-direction: column; gap: 6px; margin: 10px auto; align-items: start; }
+        .color-palette-row { display: flex; gap: 6px; justify-content: start; flex-wrap: wrap; width: 100%; min-height: 34px; align-items: center; }
         
         .color-btn { 
             width: 32px; 
@@ -355,7 +355,7 @@
     <!-- VIEW 3: 詳細・表・エディター画面 -->
     <div id="viewDetail" class="view-section">
         <div class="float-btn-container">
-            <button class="float-btn-delete" onclick="deleteActiveOll()">削除</button>
+            <button class="float-btn float-btn-delete" onclick="deleteActiveOll()">削除</button>
             <button class="float-btn float-btn-save" onclick="saveAndReturn()">保存</button>
             <button class="float-btn" onclick="tryReturnGrid()">リストに戻る</button>
         </div>
@@ -377,7 +377,9 @@
             <p style="font-size: 12px; color: #aaa; margin: 5px 0;">下のパレットから状態を選んでキューブのマスをタップしてください</p>
             
             <!-- パレット -->
-            <div class="color-palette-container" id="paletteContainer"></div>
+            <div style="text-align: center;">
+                <div class="color-palette-container" id="paletteContainer"></div>
+            </div>
 
             <div class="cube-plan" id="editorPlan"></div>
             <button onclick="closeEditor()" style="background: #28a745; width:100%; margin-top:10px;">色・マーク編集を完了する</button>
@@ -385,7 +387,7 @@
     </div>
 
     <script>
-        let ollList = JSON.parse(localStorage.getItem('oll_cp_plan_v13_list')) || [];
+        let ollList = JSON.parse(localStorage.getItem('oll_cp_plan_v14_list')) || [];
         
         let currentBrush = { color: 'yellow', hasCircle: false, hasTriangle: false };
         
@@ -396,7 +398,7 @@
         let workingOllData = null;
         let scrollPositionBeforeEdit = 0; // スクロール位置記憶用変数
 
-        const baseColors = ['yellow', 'green', 'red', 'orange', 'blue', 'white', '#444'];
+        const baseColors = ['red', 'green', 'orange', 'blue', 'white', 'yellow',  '#444'];
         
         const patternTypes = [
             { hasCircle: false, hasTriangle: false },
