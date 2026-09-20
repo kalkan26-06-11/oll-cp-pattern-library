@@ -661,10 +661,21 @@
         }
 
         function exportData() {
+            // 現在の日時を取得して「YYYY-MM-DD_HHMMSS」形式の文字列を作成
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const timestamp = `${year}-${month}-${day}_${hours}${minutes}${seconds}`;
+
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(ollList, null, 2));
             const downloadAnchor = document.createElement('a');
             downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", "oll_cp_backup.json");
+            // ファイル名に日時を動的に埋め込む
+            downloadAnchor.setAttribute("download", `oll_cp_backup_${timestamp}.json`);
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             downloadAnchor.remove();
