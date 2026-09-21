@@ -6,22 +6,6 @@
     <title>OLL CP判断パターン表ライブラリ</title>
     <style>
         body { font-family: sans-serif; max-width: 800px; margin: 10px auto; padding: 10px; padding-bottom: 70px; background: #111; color: #fff; box-sizing: border-box; user-select: none; -webkit-user-select: none; }
-        
-        /* 右側にわかりやすいスクロールバーを表示するための設定 */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #111;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #555;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #007bff;
-        }
-
         .card { background: #222; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #444; box-sizing: border-box; }
         
         input, textarea { padding: 8px; width: 100%; box-sizing: border-box; margin-bottom: 10px; background: #333; color: #fff; border: 1px solid #555; font-family: sans-serif; }
@@ -57,11 +41,8 @@
         .nav-btn { flex: 1; padding: 10px 5px; background: #222; border: 1px solid #444; color: #aaa; text-align: center; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-sizing: border-box; }
         .nav-btn.active { background: #007bff; color: #fff; border-color: #007bff; }
 
-        /* --- リスト上部のコントロールエリア（スクロールしても上部に固定） --- */
+        /* --- リスト上部のコントロールエリア --- */
         .top-controls {
-            position: sticky;
-            top: 10px;
-            z-index: 10;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -73,7 +54,6 @@
             min-height: 40px;
             box-sizing: border-box;
             gap: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
 
         .status-text {
@@ -488,7 +468,6 @@
         let isEdited = false;
         let workingOllData = null;
         let scrollPositionBeforeEdit = 0;
-        let gridScrollPosition = 0; // リスト画面のスクロール位置記憶用
 
         const baseColors = ['red', 'green', 'orange', 'blue', 'white', 'yellow', '#444'];
         
@@ -508,11 +487,6 @@
         }
 
         function switchView(viewName) {
-            // リストから別の画面へ移る直前に現在のスクロール位置を保持
-            if (document.getElementById('viewGrid').classList.contains('active') && viewName !== 'grid') {
-                gridScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
-            }
-
             document.getElementById('viewGrid').classList.remove('active');
             document.getElementById('viewNew').classList.remove('active');
             document.getElementById('viewBackup').classList.remove('active');
@@ -527,9 +501,6 @@
                 document.getElementById('tabGrid').classList.add('active');
                 closeEditor();
                 renderGrid();
-                // リスト画面に戻ったときにスクロール位置を復元
-                window.scrollTo(0, gridScrollPosition);
-                return;
             } else if (viewName === 'new') {
                 document.getElementById('viewNew').classList.add('active');
                 document.getElementById('tabNew').classList.add('active');
