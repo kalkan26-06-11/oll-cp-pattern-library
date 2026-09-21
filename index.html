@@ -5,7 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OLL CP判断パターン表ライブラリ</title>
     <style>
-        body { font-family: sans-serif; max-width: 800px; margin: 10px auto; padding: 10px; padding-bottom: 70px; background: #111; color: #fff; box-sizing: border-box; }
+        body { font-family: sans-serif; max-width: 800px; margin: 10px auto; padding: 10px; padding-bottom: 70px; background: #111; color: #fff; box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+        
+        /* 右側にわかりやすいスクロールバーを表示するための設定 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #007bff;
+        }
+
         .card { background: #222; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #444; box-sizing: border-box; }
         
         input, textarea { padding: 8px; width: 100%; box-sizing: border-box; margin-bottom: 10px; background: #333; color: #fff; border: 1px solid #555; font-family: sans-serif; }
@@ -41,9 +57,81 @@
         .nav-btn { flex: 1; padding: 10px 5px; background: #222; border: 1px solid #444; color: #aaa; text-align: center; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; box-sizing: border-box; }
         .nav-btn.active { background: #007bff; color: #fff; border-color: #007bff; }
 
+        /* --- リスト上部のコントロールエリア（スクロールしても上部に固定） --- */
+        .top-controls {
+            position: sticky;
+            top: 10px;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 15px;
+            min-height: 40px;
+            box-sizing: border-box;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        .status-text {
+            font-size: 12px;
+            color: #aaa;
+            margin: 0;
+            line-height: 1.4;
+            flex: 1;
+        }
+
+        .move-buttons {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .move-buttons button {
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+            border-radius: 4px;
+            padding: 4px 10px;
+            font-size: 13px;
+            cursor: pointer;
+            min-width: 32px;
+        }
+
+        .move-buttons button:active {
+            background: #007bff;
+        }
+
         .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .oll-grid-card { background: #1a1a1a; border: 2px solid #444; border-radius: 8px; padding: 8px 6px; text-align: center; cursor: pointer; transition: 0.2s; box-sizing: border-box; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: space-between; overflow: hidden; }
+        
+        .oll-grid-card { 
+            background: #1a1a1a; 
+            border: 2px solid #444; 
+            border-radius: 8px; 
+            padding: 8px 6px; 
+            text-align: center; 
+            transition: 0.2s; 
+            box-sizing: border-box; 
+            min-width: 0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: space-between; 
+            overflow: hidden; 
+            position: relative; 
+            cursor: pointer;
+        }
         .oll-grid-card:hover { border-color: #007bff; background: #222; transform: translateY(-2px); }
+        
+        /* 選択中のカード（青い枠） */
+        .oll-grid-card.is-selected {
+            border-color: #00bfff;
+            box-shadow: 0 0 10px rgba(0, 191, 255, 0.4);
+            background: #222;
+        }
         
         .thumb-wrapper { display: flex; justify-content: center; width: 100%; margin: 0; overflow: hidden; }
 
@@ -293,13 +381,6 @@
         .view-section { display: none; }
         .view-section.active { display: block; }
     </style>
-    <script type="text/javascript">
-    (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "yiibcncrpn");
-    </script>
 </head>
 <body>
 
@@ -313,7 +394,16 @@
     <div id="viewGrid" class="view-section active">
         <div class="card">
             <h2 style="margin-top:0; font-size: 20px;">CP判断 パターン表リスト</h2>
-            <p style="font-size: 12px; color: #aaa;">パターンをタップすると詳細画面に移動します</p>
+            
+            <!-- 上部コントロールエリア -->
+            <div class="top-controls">
+                <p id="statusText" class="status-text">パターンをタップで詳細画面に移動<br>パターンを長押しで並び替え</p>
+                <div id="moveButtons" class="move-buttons">
+                    <button id="btnUp">↑</button>
+                    <button id="btnDown">↓</button>
+                </div>
+            </div>
+
             <div id="gridContainer" class="grid-container"></div>
         </div>
     </div>
@@ -392,13 +482,15 @@
         let currentBrush = { color: 'yellow', hasCircle: false, hasTriangle: false };
         
         let selectedOllId = null;
+        let selectedIndex = null;
         let activeEditorOllId = null;
         let activeCpKey = null;
         let isEdited = false;
         let workingOllData = null;
-        let scrollPositionBeforeEdit = 0; // スクロール位置記憶用変数
+        let scrollPositionBeforeEdit = 0;
+        let gridScrollPosition = 0; // リスト画面のスクロール位置記憶用
 
-        const baseColors = ['red', 'green', 'orange', 'blue', 'white', 'yellow',  '#444'];
+        const baseColors = ['red', 'green', 'orange', 'blue', 'white', 'yellow', '#444'];
         
         const patternTypes = [
             { hasCircle: false, hasTriangle: false },
@@ -416,6 +508,11 @@
         }
 
         function switchView(viewName) {
+            // リストから別の画面へ移る直前に現在のスクロール位置を保持
+            if (document.getElementById('viewGrid').classList.contains('active') && viewName !== 'grid') {
+                gridScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+            }
+
             document.getElementById('viewGrid').classList.remove('active');
             document.getElementById('viewNew').classList.remove('active');
             document.getElementById('viewBackup').classList.remove('active');
@@ -430,6 +527,9 @@
                 document.getElementById('tabGrid').classList.add('active');
                 closeEditor();
                 renderGrid();
+                // リスト画面に戻ったときにスクロール位置を復元
+                window.scrollTo(0, gridScrollPosition);
+                return;
             } else if (viewName === 'new') {
                 document.getElementById('viewNew').classList.add('active');
                 document.getElementById('tabNew').classList.add('active');
@@ -483,7 +583,7 @@
         function getMarksHtml(color, hasCircle, hasTriangle, isMini = false, isList = false) {
             if (!hasCircle && !hasTriangle) return '';
             
-            const isLightColor = (color === 'green' || color === 'blue');
+            const isLightColor = (color === 'green' || color === 'blue' || color === '#444');
             const lightClass = isLightColor ? ' light-mark' : '';
 
             let layerClass = 'cell-mark-layer';
@@ -521,10 +621,6 @@
                 row.className = 'color-palette-row';
 
                 baseColors.forEach(color => {
-                    if ((color === 'yellow' || color === '#444') && rowIndex > 0) {
-                        return;
-                    }
-
                     const btn = document.createElement('div');
                     btn.className = 'color-btn';
                     btn.style.background = color;
@@ -578,11 +674,6 @@
         });
 
         function setCellData(cellElement, cellData) {
-            if (cellData.color === 'yellow' || cellData.color === '#444') {
-                cellData.hasCircle = false;
-                cellData.hasTriangle = false;
-            }
-
             cellElement.style.background = cellData.color;
             cellElement.dataset.color = cellData.color;
             cellElement.dataset.hasCircle = cellData.hasCircle ? 'true' : 'false';
@@ -602,12 +693,10 @@
             }
             if (val && typeof val === 'object') {
                 let col = val.color || '#444';
-                let hasC = (col === 'yellow' || col === '#444') ? false : !!val.hasCircle;
-                let hasT = (col === 'yellow' || col === '#444') ? false : !!val.hasTriangle;
                 return {
                     color: col,
-                    hasCircle: hasC,
-                    hasTriangle: hasT
+                    hasCircle: !!val.hasCircle,
+                    hasTriangle: !!val.hasTriangle
                 };
             }
             return { color: '#444', hasCircle: false, hasTriangle: false };
@@ -663,7 +752,6 @@
         }
 
         function exportData() {
-            // 現在の日時を取得して「YYYY-MM-DD_HHMMSS」形式の文字列を作成
             const now = new Date();
             const year = now.getFullYear();
             const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -676,7 +764,6 @@
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(ollList, null, 2));
             const downloadAnchor = document.createElement('a');
             downloadAnchor.setAttribute("href", dataStr);
-            // ファイル名に日時を動的に埋め込む
             downloadAnchor.setAttribute("download", `oll_cp_backup_${timestamp}.json`);
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
@@ -709,6 +796,16 @@
             reader.readAsText(file);
         }
 
+        function selectItem(index) {
+            selectedIndex = index;
+            renderGrid();
+        }
+
+        function clearSelection() {
+            selectedIndex = null;
+            renderGrid();
+        }
+
         function renderGrid() {
             const container = document.getElementById('gridContainer');
             container.innerHTML = '';
@@ -718,13 +815,12 @@
                 return;
             }
 
-            ollList.forEach(oll => {
+            ollList.forEach((oll, index) => {
                 const card = document.createElement('div');
                 card.className = 'oll-grid-card';
-                card.onclick = () => {
-                    openDetail(oll.id);
-                    switchView('detail');
-                };
+                if (index === selectedIndex) {
+                    card.classList.add('is-selected');
+                }
 
                 let thumbHtml = '<div class="thumb-wrapper"><div class="list-mini-plan">';
                 const planData = oll.cp["無交換(H,Ua,Ub,Z)"] || oll.cp["無交換"] || createDefaultPlan();
@@ -752,9 +848,78 @@
                     <div class="grid-card-title">${oll.name || 'OLL'}</div>
                     <div class="grid-card-algo">${cleanAlgo}</div>
                 `;
+
+                let pressTimer = null;
+                let isLongPress = false;
+
+                const startAction = (e) => {
+                    isLongPress = false;
+                    pressTimer = setTimeout(() => {
+                        isLongPress = true;
+                        selectItem(index);
+                    }, 500);
+                };
+
+                const cancelAction = () => {
+                    clearTimeout(pressTimer);
+                };
+
+                card.addEventListener('touchstart', startAction);
+                card.addEventListener('touchmove', cancelAction);
+                card.addEventListener('touchend', cancelAction);
+
+                card.addEventListener('mousedown', startAction);
+                card.addEventListener('mousemove', cancelAction);
+                card.addEventListener('mouseup', cancelAction);
+
+                card.addEventListener('click', (e) => {
+                    if (isLongPress) return;
+                    
+                    if (selectedIndex !== null) {
+                        clearSelection();
+                    } else {
+                        openDetail(oll.id);
+                        switchView('detail');
+                    }
+                });
+
                 container.appendChild(card);
             });
         }
+
+        const btnUp = document.getElementById('btnUp');
+        btnUp.addEventListener('click', () => {
+            if (selectedIndex === null || selectedIndex <= 0) return;
+            
+            const temp = ollList[selectedIndex];
+            ollList[selectedIndex] = ollList[selectedIndex - 1];
+            ollList[selectedIndex - 1] = temp;
+            
+            selectedIndex--;
+            saveStorage();
+            renderGrid();
+        });
+
+        const btnDown = document.getElementById('btnDown');
+        btnDown.addEventListener('click', () => {
+            if (selectedIndex === null || selectedIndex >= ollList.length - 1) return;
+            
+            const temp = ollList[selectedIndex];
+            ollList[selectedIndex] = ollList[selectedIndex + 1];
+            ollList[selectedIndex + 1] = temp;
+            
+            selectedIndex++;
+            saveStorage();
+            renderGrid();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.oll-grid-card') && !e.target.closest('.top-controls')) {
+                if (selectedIndex !== null) {
+                    clearSelection();
+                }
+            }
+        });
 
         function openDetail(id) {
             selectedOllId = id;
@@ -910,12 +1075,11 @@
             isEdited = true;
             if (workingOllData) {
                 workingOllData.name = document.getElementById('detailName').value;
-                workingOllData.algo = document.getElementById('detailAlgo').value;
+                workingOllData.algo = document.getElementById('detailAlgo');
             }
         }
 
         function openEditorForWorking(cpKey) {
-            // エディターを開く直前のスクロール位置を記憶する
             scrollPositionBeforeEdit = window.pageYOffset || document.documentElement.scrollTop;
 
             activeCpKey = cpKey;
@@ -951,16 +1115,15 @@
                 let index = cell.dataset.index;
                 if (face && index !== undefined) {
                     let col = cell.dataset.color || '#444';
-                    let hasC = (col === 'yellow' || col === '#444') ? false : (cell.dataset.hasCircle === 'true');
-                    let hasT = (col === 'yellow' || col === '#444') ? false : (cell.dataset.hasTriangle === 'true');
-
+                    
                     newPlan[face][index] = {
                         color: col,
-                        hasCircle: hasC,
-                        hasTriangle: hasT
+                        hasCircle: (cell.dataset.hasCircle === 'true'),
+                        hasTriangle: (cell.dataset.hasTriangle === 'true')
                     };
                 }
             }
+
             workingOllData.cp[activeCpKey] = newPlan;
             renderDetailView();
         }
@@ -969,7 +1132,6 @@
             document.getElementById('editorCard').style.display = 'none';
             activeCpKey = null;
 
-            // 編集完了時にエディターを開く直前のスクロール位置に戻す
             window.scrollTo({
                 top: scrollPositionBeforeEdit,
                 behavior: 'smooth'
